@@ -32,6 +32,7 @@ return $items[$line];
 
 public function get($word)
 {
+error_log("Api->get($word)");
 foreach(array(1,2,3) as $iteration)
 	{
 	$code=file_get_contents("http://www.wolframalpha.com/input/autocomplete.jsp?qr=0&i=$word");
@@ -70,6 +71,7 @@ $data[]=$this->parseStr($this->getLineByNum($struct["geographicproperties:countr
 $data[]=$this->parseStr($this->getLineByNum($struct["demographicproperties:countrydata"]["plain"],3));
 $full=array("data"=>$data);
 if(!empty($mainimg)) $full["img"]="http://www.wolframcdn.com/summaryboxes/$mainimg/img/mainimage.gif";
+error_log("apifinish");
 return $full;
 }
 
