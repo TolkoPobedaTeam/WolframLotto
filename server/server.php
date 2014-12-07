@@ -5,7 +5,6 @@ if(!$is_console) die("Only cli mode available");
 ini_set("display_errors",1);
 ini_set("log_errors", 1);
 ini_set("error_log", "/tmp/wolframlotto.log");
-error_log("#Started");
 ignore_user_abort(true);
 set_time_limit(0);
 ob_start();
@@ -26,18 +25,20 @@ require_once(dirname(__FILE__)."/classes/game.php");
 require_once(dirname(__FILE__)."/classes/users.php");
 
 #$host = 'localhost'; //host
-$host = 'wolf.verygame.ru'; //host
+#$host = 'wolf.verygame.ru'; //host
 $host = 'yak15.koding.io'; //host
 $port = '9000'; //port
 $null = NULL; //null var
 	
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);//Create TCP/IP sream socket
 socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);//reuseable port
-if(!socket_bind($socket, 0, $port))
+if(!@socket_bind($socket, 0, $port))
 	{
-	error_log("Can`t bind socket, exit.");
+	//error_log("Can`t bind socket, exit.");
+	//error_log(".");
 	exit;
 	}
+error_log("#Started");
 register_shutdown_function(function() {error_log("#Stopped");});
 
 socket_listen($socket);
