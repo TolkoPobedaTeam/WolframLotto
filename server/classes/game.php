@@ -42,7 +42,6 @@ send_message(array('type'=>'game.info', 'data'=>array(
 public function RoundStart()
 {
 if($this->roundid>=$GLOBALS["maxrounds"]) return $this->GameOver();
-$GLOBALS["lasttime"]=time();
 $this->lastaction='game.round.start';
 
 //get random cardname
@@ -51,6 +50,7 @@ $cardname=array_shift($this->carditemsround);
 //get data for it
 #$carddata='Test data fro country "*'.substr($cardname,1).'"';
 $carddata=$this->WApi->get($cardname);
+$GLOBALS["lasttime"]=time();//only here!
 
 $this->roundid++;
 $this->rounds[$this->roundid]=array(
