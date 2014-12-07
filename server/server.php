@@ -104,7 +104,7 @@ while (true)
 			{
 			$received_text = unmask($buf); //unmask data
 			$msg = json_decode($received_text,true); //json decode 
-			$user_name = $msg["name"]; //sender name
+			#$user_name = $msg["name"]; //sender name
 			#$user_message = $msg["message"]; //message text
 			#$user_color = $msg["color"]; //color
 			$cmd = $msg["cmd"]; //cmd
