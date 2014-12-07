@@ -27,6 +27,7 @@ require_once(dirname(__FILE__)."/classes/users.php");
 
 #$host = 'localhost'; //host
 $host = 'wolf.verygame.ru'; //host
+$host = 'yak15.koding.io'; //host
 $port = '9000'; //port
 $null = NULL; //null var
 	
