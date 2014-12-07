@@ -23,6 +23,7 @@ if ($pid) {
 require_once(dirname(__FILE__)."/classes/db.php");
 require_once(dirname(__FILE__)."/classes/game.php");
 require_once(dirname(__FILE__)."/classes/users.php");
+require_once(dirname(__FILE__)."/classes/wolframApi.php");
 
 #$host = 'localhost'; //host
 #$host = 'wolf.verygame.ru'; //host
@@ -47,9 +48,9 @@ $clients = array($socket);
 
 $lasttime=time();
 $times=array(
-	"waitplayers"=>20,
-	"aftergamestart"=>5,
-	"afterroundend"=>5,
+	"waitplayers"=>25,
+	"aftergamestart"=>2,
+	"afterroundend"=>1,
 	"afterroundstart"=>10,
 	);
 $maxrounds=15;

@@ -5,7 +5,7 @@ class Game
 
 public $Users;
 public $lastaction;
-private $carditems=array("Afghanistan", "Albania", "Belarus", "Brazil", "Burkina Faso", "China", "Cuba", "Egypt", "Finland", "Germany", "Greece", "Iran", "Israel", "India", "Libya", "Malta", "Morocco", "Norway", "Poland", "Qatar", "Russia", "Spain", "Sweden", "Thailand", "Zimbabwe");
+private $carditems=array("Afghanistan", "Albania", "Belarus", "Brazil", "China", "Cuba", "Egypt", "Italy", "Germany", "Greece", "Iran", "Israel", "India", "Libya", "Malta", "Morocco", "Norway", "Poland", "Qatar", "Russia", "Spain", "Sweden", "Thailand", "Zimbabwe");
 private $carditemsround;
 public $roundid;
 public $roundcardname;
@@ -15,6 +15,7 @@ public $roundchoices;
 public function __construct()
 {
 $this->Users=new Users();
+$this->WApi=new WolframApi();
 }
 
 
@@ -48,7 +49,8 @@ $this->lastaction='game.round.start';
 $cardname=array_shift($this->carditemsround);
 
 //get data for it
-$carddata='Test data fro country "*'.substr($cardname,1).'"';
+#$carddata='Test data fro country "*'.substr($cardname,1).'"';
+$carddata=$this->WApi->get($cardname);
 
 $this->roundid++;
 $this->rounds[$this->roundid]=array(
