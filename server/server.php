@@ -1,16 +1,25 @@
 #!/usr/bin/php
 <?php
 $is_console = PHP_SAPI == 'cli' || (!isset($_SERVER['DOCUMENT_ROOT']) && !isset($_SERVER['REQUEST_URI'])); 
-if(!$is_console) die("Onli cli mode available");
+if(!$is_console) die("Only cli mode available");
 ini_set("display_errors",1);
+ini_set("log_errors", 1);
+ini_set("error_log", "/tmp/wolframlotto.log");
+error_log("#Started");
+ignore_user_abort(true);
+set_time_limit(0);
+ob_start();
+
 error_reporting(E_ALL);
+
+
+//make fork
 $pid = pcntl_fork();
 if ($pid == -1)  die("Could not fork\n");
 if ($pid) {
 	echo "Go to background...\n";
 	exit;
 	}
-
 
 require_once(dirname(__FILE__)."/classes/db.php");
 require_once(dirname(__FILE__)."/classes/game.php");
@@ -20,24 +29,31 @@ require_once(dirname(__FILE__)."/classes/users.php");
 $host = 'wolf.verygame.ru'; //host
 $port = '9000'; //port
 $null = NULL; //null var
-//$filedbpath=dirname(__FILE__)."/filedb/";
-$lasttime=time();
-$times=array(
-	"waitplayers"=>30,
-	"aftergamestart"=>5,
-	"afterroundend"=>5,
-	"afterroundstart"=>15,
-	);
-$maxrounds=15;
-
-$Game=new Game();
-$Game->End();	
 	
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);//Create TCP/IP sream socket
 socket_set_option($socket, SOL_SOCKET, SO_REUSEADDR, 1);//reuseable port
-socket_bind($socket, 0, $port);
+if(!socket_bind($socket, 0, $port))
+	{
+	error_log("Can`t bind socket, exit.");
+	exit;
+	}
+register_shutdown_function(function() {error_log("#Stopped");});
+
 socket_listen($socket);
 $clients = array($socket);
+
+
+$lasttime=time();
+$times=array(
+	"waitplayers"=>20,
+	"aftergamestart"=>5,
+	"afterroundend"=>5,
+	"afterroundstart"=>10,
+	);
+$maxrounds=2;
+$Game=new Game();
+$Game->End();	
+
 
 while (true) 
 	{
@@ -70,7 +86,8 @@ while (true)
 		$header = socket_read($socket_new, 1024); //read data sent by the socket
 		perform_handshaking($header, $socket_new, $host, $port); //perform websocket handshake		
 		socket_getpeername($socket_new, $ip); //get ip address of connected socket #$ip='127.0.0.1';
-		send_message(array('type'=>'debug', 'message'=>$ip.' connected')); //notify all users about new connection
+		$Game->GetInfo();
+		//send_message(array('type'=>'debug', 'message'=>$ip.' connected')); //notify all users about new connection
 		
 		//make room for new socket
 		$found_socket = array_search($socket, $changed);
@@ -146,7 +163,7 @@ while (true)
 			unset($clients[$found_socket]);
 
 			//notify all users about disconnected connection
-			send_message(array('type'=>'system', 'message'=>$ip.' disconnected'));
+			send_message(array('type'=>'debug', 'message'=>$ip.' disconnected'));
 			}
 		}
 	}
@@ -239,3 +256,7 @@ function perform_handshaking($receved_header,$client_conn, $host, $port)
 	"Sec-WebSocket-Accept:$secAccept\r\n\r\n";
 	socket_write($client_conn,$upgrade,strlen($upgrade));
 }
+
+
+
+ob_end_flush();

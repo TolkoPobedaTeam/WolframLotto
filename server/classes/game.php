@@ -18,10 +18,29 @@ $this->Users=new Users();
 }
 
 
+private function GetDTime()
+{
+$dtime=0;
+if($this->lastaction=='game.end') $dtime=$GLOBALS["times"]["waitplayers"]-(time()-$GLOBALS["lasttime"]);
+if($this->lastaction=='game.start') $dtime=$GLOBALS["times"]["aftergamestart"]-(time()-$GLOBALS["lasttime"]);
+if($this->lastaction=='game.round.start') $dtime=$GLOBALS["times"]["afterroundstart"]-(time()-$GLOBALS["lasttime"]);
+if($this->lastaction=='game.round.end') $dtime=$GLOBALS["times"]["afterroundend"]-(time()-$GLOBALS["lasttime"]);
+return $dtime;
+}
+
+public function GetInfo()
+{
+send_message(array('type'=>'game.info', 'data'=>array(
+	"users"=>$this->Users->getData($choices),
+	"roundid"=>$this->roundid,
+	"lastaction"=>$this->lastaction,
+	"dtime"=>$this->GetDTime(),
+	))); //send data
+}
 
 public function RoundStart()
 {
-if($this->roundid>=$GLOBALS["maxrounds"]) $this->GameOver();
+if($this->roundid>=$GLOBALS["maxrounds"]) return $this->GameOver();
 $GLOBALS["lasttime"]=time();
 $this->lastaction='game.round.start';
 
@@ -34,7 +53,7 @@ $carddata='Test data fro country "*'.substr($cardname,1).'"';
 $this->roundid++;
 $this->rounds[$this->roundid]=array(
 	"cardname"=>$cardname,
-	"carddata"=>$cardata
+	"carddata"=>$carddata
 	);
 $this->roundchoices=array();
 $this->roundcardname=$cardname;
@@ -73,7 +92,7 @@ foreach($this->roundchoices as $userid=>$placeid)
 		$this->Users->data["users"][$uind]["success"]++;
 		if($this->Users->data["users"][$uind]["success"]>=count($this->Users->data["users"][$uind]["positions"]))
 			{
-			$this->GameOver();
+			return $this->GameOver();
 			}
 		$this->Users->data["users"][$uind]["positions"][$placeid]["status"]=1;
 		$choices[$userid]=array("placeid"=>$placeid,"result"=>1);
@@ -148,6 +167,7 @@ public function End()
 //reset data
 $this->lastaction='game.end';
 $this->Users->data=array("users"=>array(),"placemap"=>array());
+$this->Users->Save();
 $this->roundid=0;
 $this->roundcardname='';
 $this->rounds=array();

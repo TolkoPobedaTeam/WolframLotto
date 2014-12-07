@@ -45,6 +45,7 @@ $this->data=array("users"=>$users,"placemap"=>$placemap);
 public function Save()
 {
 //$this->Db->writeData($this->serverid,"users",$this->data);
+$this->count=count($users);
 }
 
 
