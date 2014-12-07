@@ -1,11 +1,13 @@
-$(function() {
-    $( ".startGame" ).click(function () {
-        $(".modal").addClass("hide");
-        Game.Connect();
-    })
-  });
-  
 Interface = {};
+
+Interface.Init = function ()
+{
+    $( ".startGame" ).click(function () {
+        $(".login").addClass("hide");
+        Game.Connect();
+    });
+    Interface.ModalInfo("Please wait, check session...");
+}
 
 Interface.DraggableCard = function ()
 {
@@ -25,7 +27,6 @@ Interface.DraggableCard = function ()
 			if ($(".block.active").length) {
 				$( "#draggable" ).offset($(".block.active").offset());
 				$( "#draggable .title" ).text($(".block.active i").text());
-				Game.Choice($(".block.active").attr("data-placeid"));
 			} else {
 				$( "#draggable" ).offset(startPosition);
 				$( "#draggable .title" ).text("");
@@ -35,10 +36,28 @@ Interface.DraggableCard = function ()
 			if ($(".block.active").length) {
 				$( "#draggable" ).offset($(".block.active").offset());
 				$( "#draggable .title" ).text($(".block.active i").text());
+				Game.Choice($(".block.active").attr("data-placeid"));
 			} else {
 				$( "#draggable" ).offset(startPosition);
 				$( "#draggable .title" ).text("");
 			}
 		}
 	});
+}
+
+Interface.ModalInfo = function (msg)
+{
+    $(".modal.info").removeClass("hide");
+    $(".modal.info h4").html(msg);
+}
+
+Interface.ModalInfoHide = function ()
+{
+    $(".modal.info").addClass("hide");
+}
+
+
+Interface.LogIn = function ()
+{
+    $(".modal.login").removeClass("hide");
 }

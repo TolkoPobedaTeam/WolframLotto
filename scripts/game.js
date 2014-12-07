@@ -1,10 +1,79 @@
 Game = {};
+Game.Init = function (cfg)
+{
+    Game.sessid = cfg.sessid;
+    Game.OpenWebSocket(cfg.wsURL);
+    Interface.Init();
+}
+
+Game.OpenWebSocket = function (wsUri)
+{
+    var websocket =new WebSocket(wsUri);
+    
+    websocket.onopen = function(ev) { // connection is open 
+	    console.log("Connected!");
+	}
+
+	//#### Message received from server?
+	websocket.onmessage = function(ev) {
+		var msg = JSON.parse(ev.data); //PHP sends Json data
+		var type = msg.type; //message type
+		var data = msg.data;
+		
+		console.log("ONMSG:"+ev.data);
+		
+		if (type == "game.info") Game.Info(data);
+		if (type == "game.refresh") Game.Refresh(data);
+		if (type == "game.start") Game.Start(data);
+		if (type == "game.round.start") Game.StartRound(data);
+		if (type == "game.round.end") Game.EndRound(data);
+	};
+	
+	websocket.onerror	= function(ev){console.log(ev.data)}; 
+	websocket.onclose 	= function(ev){console.log(ev.data)}; 
+	
+	Game.websocket = websocket;
+}
+
+Game.Info = function (data) {
+     Game.RefreshUsers(data);
+     Game.RefreshLoto(data);
+     Interface.ModalInfoHide();
+     if (!Game.isLogged) Interface.LogIn();
+}
+
 Game.Refresh = function (data) {
+    Game.RefreshUsers(data);
+    
+    // timer
+    if (data.users.length>1 && (data.dtime||0)>0) {
+        $("#startGameCounter").show();
+        var timer = data.dtime;
+        Game.startInterval = setInterval(function(){
+            $("#startGameCounter b").text(timer);
+            timer--;
+            if (timer<0) {
+                clearInterval(Game.startInterval);
+                $("#startGameCounter").fadeOut();
+            }
+        }, 1000);
+    }
+}
+
+Game.Start = function (data) {
+    Game.RefreshUsers(data);
+    Game.RefreshLoto(data);
+}
+
+Game.RefreshUsers = function (data) {
     var usersHTML = "";
     for (var u=0; u<data.users.length; u++) {
         var className = [];
         
-        if (data.users[u].sessmd5 == $.md5(Game.sessid)) className.push("iam");
+        if (data.users[u].sessmd5 == $.md5(Game.sessid)) {
+            Game.isLogged = true;
+            className.push("iam");
+        }
         
         usersHTML += '<li class='+className.join(' ')+'>'+data.users[u].name
             +'<i class="success">'+data.users[u].success+'</i>'
@@ -13,28 +82,11 @@ Game.Refresh = function (data) {
     }
     $(".users ul").html(usersHTML);
     
-    // timer
     if (data.users.length>1) {
-        if ((data.dtime||0)>0) {
-            $("#startGameCounter").show();
-            var timer = data.dtime;
-            Game.startInterval = setInterval(function(){
-                $("#startGameCounter b").text(timer);
-                timer--;
-                if (timer<0) {
-                    clearInterval(Game.startInterval);
-                    $("#startGameCounter").fadeOut();
-                }
-            }, 1000);
-        }
         $('#onePlayer').hide();
     } else {
         $('#onePlayer').show();
     }
-}
-
-Game.Start = function (data) {
-    Game.RefreshLoto(data);
 }
 
 Game.RefreshLoto = function (data) {
@@ -44,7 +96,8 @@ Game.RefreshLoto = function (data) {
             for (var i=0; i<data.users[u].positions.length; i++) {
                 var title = data.users[u].positions[i].name;
                 var placeid = data.users[u].positions[i].id;
-                loto += '<div class="block" data-placeid="'+placeid+'"><center><i>'+title+'</i></center></div>';
+                var statusCls = data.users[u].positions[i].status == 1 ? " statusOk" : "";
+                loto += '<div class="block'+statusCls+'" data-placeid="'+placeid+'"><center><i>'+title+'</i></center></div>';
             }
         }
     }
@@ -65,7 +118,9 @@ Game.EndRound = function (data) {
         if (data.users[u].sessmd5 == $.md5(Game.sessid)) {
             if (data.users[u].choices) {
                 if (data.users[u].choices.result == 1) {
-                    $("#draggable").attr("id", "card"+data.users[u].choices.placeid);
+                    $("#draggable")
+                        .attr("id", "card"+data.users[u].choices.placeid)
+                        .draggable({disabled: true});
                 }
             }
         }
@@ -88,7 +143,7 @@ Game.Connect = function ()
 	    };
 	
 	//convert and send data to server
-	websocket.send(JSON.stringify(msg));
+	Game.websocket.send(JSON.stringify(msg));
 	console.log("SEND: "+JSON.stringify(msg));
 }
 
@@ -101,7 +156,7 @@ Game.Choice = function (placeid)
     };
 	
 	//convert and send data to server
-	websocket.send(JSON.stringify(msg));
+	Game.websocket.send(JSON.stringify(msg));
 	console.log("SEND: "+JSON.stringify(msg));
 }
 
