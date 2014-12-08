@@ -204,8 +204,11 @@ Game.End = function (data)
         endHTML += "Winners: " + winners.join(", ") + ".<br><br>";
         if (iWinner) endHTML += "Congrats, You win!! Your knowledge is impressive!!!";
     } else {
-        endHTML += "No winners. :("
+        endHTML += "No winners. :(";
     }
+    
+    endHTML += "<br>For start again refresh page.";
+    
     Interface.ModalInfo(endHTML);
 }
 
