@@ -54,7 +54,7 @@ $times=array(
 	"afterroundstart"=>10,
 	);
 $maxrounds=15;
-$maxrounds=3;
+#$maxrounds=3;
 $Game=new Game();
 $Game->End();	
 
