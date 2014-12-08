@@ -27,7 +27,7 @@ Game.OpenWebSocket = function (wsUri)
 		if (type == "game.start") Game.Start(data);
 		if (type == "game.round.start") Game.StartRound(data);
 		if (type == "game.round.end") Game.EndRound(data);
-		if (type == "game.end") Game.Start(data);
+		if (type == "game.end") Game.End(data);
 		if (type == "error") Game.Error(msg.message);
 	};
 	
@@ -171,6 +171,8 @@ Game.Choice = function (placeid)
 
 Game.End = function (data)
 {
+    Interface.InfoHide("Wait next round. (Sometimes Wolfram API long answer)");
+    
     var endHTML = "Game End.<br>"
     if (data.winners.length) {
         var winners = [];
@@ -180,7 +182,7 @@ Game.End = function (data)
             users[data.users[i].id] = data.users[i];
         }
         for (var i=0; i<data.winners.lenght; i++) {
-            var userid = data.winners[i];
+            var userid = data.winners[i].userid;
             if (users[userid]) winners.push(users[userid].name);
             if (users[userid].sessmd5 == $.md5(Game.sessid)) iWinner = true;
         }
@@ -189,7 +191,7 @@ Game.End = function (data)
     } else {
         endHTML += "No winners. :("
     }
-    Interface.ModalInfo();
+    Interface.ModalInfo(endHTML);
 }
 
 Game.Error = function (err)
