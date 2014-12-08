@@ -174,20 +174,28 @@ Game.End = function (data)
     Interface.InfoHide("Wait next round. (Sometimes Wolfram API long answer)");
     
     var endHTML = "Game End.<br>"
+    
     if (data.winners.length) {
         var winners = [];
         var users = [];
         var iWinner = false;
-        for (var i=0; i<data.users.lenght; i++) {
-            users[data.users[i].id] = data.users[i];
+        
+        console.log(data.users.length);
+        for (var i=0; i<data.users.length; i++) {
+            users[data.users[i].userid] = data.users[i];
+            console.log(data.users[i]);
         }
-        for (var i=0; i<data.winners.lenght; i++) {
-            var userid = data.winners[i].userid;
-            if (users[userid]) winners.push(users[userid].name);
-            if (users[userid].sessmd5 == $.md5(Game.sessid)) iWinner = true;
+        for (var i=0; i<data.winners.length; i++) {
+            var userid = data.winners[i];
+            
+            if (users[userid]) {
+                winners.push(users[userid].name);
+                if (users[userid].sessmd5 == $.md5(Game.sessid)) iWinner = true;
+            }
         }
-        endHTML += "Winners: " + winners.join(", ") + ".<br>";
-        if (iWinner) endHTML += "Congrats, Your knowledge is impressive!";
+        console.log(users);
+        endHTML += "Winners: " + winners.join(", ") + ".<br><br>";
+        if (iWinner) endHTML += "Congrats, You win!! Your knowledge is impressive!!!";
     } else {
         endHTML += "No winners. :("
     }
