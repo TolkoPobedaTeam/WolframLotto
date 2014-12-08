@@ -123,10 +123,13 @@ Game.StartRound = function (data) {
     $("#roundCounter").fadeIn();
     $("#roundCounter b").html(data.roundid);
     
-    Interface.InfoHide("Wait next round. (Sometimes Wolfram API long answer)");
+    var rightAnswer = Game.cardname ? "<br><br><br>Right Answer was: <b>" + Game.cardname + "</b>" : "";
+    Interface.Info(rightAnswer);
 }
 
 Game.EndRound = function (data) {
+    Game.cardname = data.cardname;
+    
     $("#draggable").draggable({disabled:true});
     $("#draggable").attr("id", "").fadeOut(500, function () {
         $(this).remove();
@@ -135,7 +138,11 @@ Game.EndRound = function (data) {
     
     $("#roundCounter").fadeOut();
     
-    Interface.Info("Wait next round. (Sometimes Wolfram API long answer)");
+    var rightAnswer = Game.cardname ? "<br><br>Right Answer was: <b>" + Game.cardname + "</b>" : "";
+    Interface.Info(
+         "Wait next round. (Sometimes Wolfram API long answer)"
+        + rightAnswer
+    );
     
     Game.Refresh(data);
     Game.RefreshLoto(data);
@@ -171,7 +178,7 @@ Game.Choice = function (placeid)
 
 Game.End = function (data)
 {
-    Interface.InfoHide("Wait next round. (Sometimes Wolfram API long answer)");
+    Interface.InfoHide();
     
     var endHTML = "Game End.<br>"
     
